@@ -1,0 +1,20 @@
+{
+  "name": "@repo/indexer",
+  "version": "0.1.0",
+  "description": "Cross-Chain Treasury Monitor - Indexer Service",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+

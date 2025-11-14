@@ -26,7 +26,7 @@ Este paquete define las primitivas de configuracion usadas por el indexer, la AP
    export const fullConfig = extendConfig({ chainProfiles: newChains });
    ```
 2. **Inyectar el resultado** (`fullConfig`) en `apps/indexer`, `apps/api` o `apps/web` segun corresponda.
-3. **Documentar cambios** en `docs/internal/README.md` para mantener trazabilidad.
+3. **Documentar cambios** en `docs/INTERNAL.md` para mantener trazabilidad.
 
 ## Buenas practicas
 - Mantener todos los secretos fuera del repositorio (usar `process.env` o vault).
