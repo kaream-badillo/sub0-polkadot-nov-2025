@@ -1,0 +1,23 @@
+{
+  "name": "@repo/adapters",
+  "version": "0.1.0",
+  "description": "Cross-Chain Treasury Monitor - Balance Providers for Hyperbridge and EVM chains",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@hyperbridge/sdk": "^1.4.5",
+    "ethers": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.4"
+  }
+}
+
