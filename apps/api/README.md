@@ -6,7 +6,10 @@ API Gateway REST para el Cross-Chain Treasury Monitor. Expone endpoints para ges
 
 - ✅ Servidor Fastify con TypeScript
 - ✅ Endpoints REST para wallets, chains y alerts
-- ✅ Integración con `apps/indexer` (repositorio en memoria)
+- ✅ **Integración con `apps/indexer` y `@repo/adapters` para balances reales**
+- ✅ **GET /wallets retorna balances agregados con latest snapshot**
+- ✅ **POST /alerts configura umbrales en el indexer**
+- ✅ **Documentación OpenAPI/Swagger** disponible en `/docs`
 - ✅ Testing básico con Vitest
 - ✅ CORS habilitado para desarrollo
 - ✅ Health check endpoint
@@ -37,6 +40,18 @@ npm test
 npm run test:coverage
 ```
 
+## Documentación API
+
+La documentación OpenAPI/Swagger está disponible en:
+
+**http://localhost:3000/docs**
+
+Incluye:
+- Esquemas de todos los endpoints
+- Parámetros y tipos de respuesta
+- Ejemplos de requests y responses
+- Interfaz interactiva para probar endpoints
+
 ## Endpoints Disponibles
 
 ### Health Check
@@ -50,17 +65,21 @@ curl http://localhost:3000/health
 ```json
 {
   "status": "ok",
-  "timestamp": 1700000000000
+  "timestamp": 1700000000000,
+  "version": "0.1.0"
 }
 ```
 
 ### Wallets
 
-#### Listar todas las wallets
+#### Listar todas las wallets con balances agregados
 
 ```bash
-# GET /wallets - Obtener todas las wallets registradas
+# GET /wallets - Obtener todas las wallets con sus balances más recientes
 curl http://localhost:3000/wallets
+
+# Sin incluir balances
+curl http://localhost:3000/wallets?includeBalance=false
 ```
 
 **Respuesta:**
@@ -74,12 +93,20 @@ curl http://localhost:3000/wallets
       "address": "0x...",
       "chainId": "polkadot-relay",
       "tags": ["treasury", "core"],
-      "importance": "core-treasury"
+      "importance": "core-treasury",
+      "latestSnapshot": {
+        "balance": "1000000000000",
+        "timestamp": 1700000000000,
+        "delta": "-50000000000",
+        "percentageChange": -5.0
+      }
     }
   ],
   "count": 1
 }
 ```
+
+**Nota:** Los balances son obtenidos del indexer usando `BalanceProvider` (Hyperbridge o EVM directo).
 
 #### Obtener wallet específica
 
@@ -364,28 +391,57 @@ npm run test:coverage
 
 ## Integración con Indexer
 
-El API Gateway consume el servicio `WalletIndexerService` desde `apps/indexer`:
+El API Gateway se inicializa con:
+
+1. **BalanceProvider** creado usando `createBalanceProvider()` desde `@repo/adapters`
+   - Soporta Hyperbridge (cross-chain storage queries)
+   - Soporta EVM directo (RPC queries)
+   - Configurado con `chainProfiles` desde `@repo/config`
+
+2. **IndexerService** configurado con:
+   - BalanceProvider para queries reales
+   - Intervalo de sincronización configurable (`INDEXER_SYNC_INTERVAL_MS`)
+   - Thresholds para movimientos significativos
+   - AlertRules para alertas automáticas
+
+3. **Wallets iniciales** registradas desde `@repo/config`
 
 ```typescript
 import { createIndexerService } from '@repo/indexer';
+import { createBalanceProvider } from '@repo/adapters';
+import { chainProfiles, alertRules } from '@repo/config';
 
-const indexerService = createIndexerService();
-// Usar indexerService en las rutas
+const balanceProvider = createBalanceProvider({
+  useHyperbridge: true,
+  hyperbridgeIndexerUrl: process.env.HYPERBRIDGE_RPC_URL,
+  chainProfiles: chainProfiles
+});
+
+const indexerService = createIndexerService(balanceProvider, {
+  syncIntervalMs: 60000,
+  alertRules: alertRules
+});
 ```
+
+**Nota:** El indexer está configurado pero **no inicia el job periódico automáticamente** en la API. Para iniciar la sincronización periódica, usa `indexerService.startPeriodicSync()` en un script separado.
 
 ## Próximos Pasos
 
-1. Integrar con `packages/adapters` para queries multichain reales
-2. Implementar validación de schemas con Zod
-3. Agregar rate limiting
-4. Implementar autenticación (opcional)
-5. Generar documentación OpenAPI
+1. ✅ Integrar con `packages/adapters` para queries multichain reales - **COMPLETADO**
+2. ✅ Generar documentación OpenAPI - **COMPLETADO**
+3. Implementar validación de schemas con Zod
+4. Agregar rate limiting
+5. Implementar autenticación (opcional)
 6. Agregar caching para mejor rendimiento
+7. Iniciar job periódico automáticamente en la API
 
 ## Dependencias
 
 - `@repo/config` - Interfaces compartidas
-- `@repo/indexer` - Servicio de indexación
+- `@repo/indexer` - Servicio de indexación con BalanceProvider
+- `@repo/adapters` - BalanceProvider para Hyperbridge y EVM
 - `fastify` - Framework web
 - `@fastify/cors` - Soporte CORS
+- `@fastify/swagger` - Documentación OpenAPI
+- `@fastify/swagger-ui` - Interfaz Swagger UI
 - `vitest` - Framework de testing
