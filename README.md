@@ -133,10 +133,17 @@ npm run build
 
 1. Copiar y configurar variables de entorno:
    ```bash
-   # TODO: Agregar archivo .env.example
+   cp env.example .env
+   # Editar .env con tus valores
    ```
 
-2. Actualizar placeholders en `packages/config/src/index.ts`:
+2. Variables de entorno necesarias (ver `env.example`):
+   - `HYPERBRIDGE_RPC_URL` - Endpoint de Hyperbridge (obtener del hackathon)
+   - `POLKADOT_RPC_URL` - RPC de Polkadot
+   - `API_PORT` - Puerto del API Gateway (default: 3000)
+   - `INDEXER_SYNC_INTERVAL_MS` - Intervalo de sincronización (default: 60000)
+
+3. Actualizar placeholders en `packages/config/src/index.ts`:
    - `TODO_RPC_URL` → URLs de RPC reales
    - `TODO_CHAIN_ID` → IDs de chains
    - `TODO_WALLET_ADDR` → Direcciones de wallets a monitorear
@@ -220,7 +227,10 @@ Ver el roadmap completo en [`docs/ROADMAP-PASOS.md`](docs/ROADMAP-PASOS.md).
 ## 📝 Documentación
 
 - [`docs/ROADMAP-PASOS.md`](docs/ROADMAP-PASOS.md) - Roadmap de desarrollo
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - Arquitectura del proyecto
+- [`docs/STRUCTURE-EXPLANATION.md`](docs/STRUCTURE-EXPLANATION.md) - Explicación de la estructura
 - [`docs/INTERNAL.md`](docs/INTERNAL.md) - Decisiones técnicas y runbooks
+- [`docs/info-sdk`](docs/info-sdk) - Información sobre Hyperbridge SDK
 - [`cursor/project-context.md`](cursor/project-context.md) - Contexto del proyecto
 - [`apps/indexer/README.md`](apps/indexer/README.md) - Documentación del indexer
 
