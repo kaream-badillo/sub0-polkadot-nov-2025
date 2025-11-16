@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/api.Dockerfile
+    container_name: crosschain-api
+    environment:
+      # API config
+      - API_PORT=3000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - API_RATE_LIMIT_PER_MINUTE=${API_RATE_LIMIT_PER_MINUTE:-60}
+      # Hyperbridge / chains (placeholders)
+      - HYPERBRIDGE_RPC_URL=${HYPERBRIDGE_RPC_URL:-http://host.docker.internal:3000}
+      - HYPERBRIDGE_WS_URL=${HYPERBRIDGE_WS_URL:-wss://TODO_HYPERBRIDGE_WS_URL}
+      - HYPERBRIDGE_STATE_MACHINE_ID=${HYPERBRIDGE_STATE_MACHINE_ID:-TODO_STATE_MACHINE_ID}
+      - HYPERBRIDGE_CONSENSUS_STATE_ID=${HYPERBRIDGE_CONSENSUS_STATE_ID:-TODO_CONSENSUS_STATE_ID}
+      - HYPERBRIDGE_HASHER=${HYPERBRIDGE_HASHER:-Keccak}
+      - ENABLE_HYPERBRIDGE=${ENABLE_HYPERBRIDGE:-true}
+      - ENABLE_EVM_CHAINS=${ENABLE_EVM_CHAINS:-true}
+      - ENABLE_ALERTS=${ENABLE_ALERTS:-false}
+      - POLKADOT_RPC_URL=${POLKADOT_RPC_URL:-wss://TODO_POLKADOT_RPC_URL}
+      - LISK_TESTNET_RPC_URL=${LISK_TESTNET_RPC_URL:-https://TODO_LISK_TESTNET_RPC_URL}
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL:-https://TODO_ETHEREUM_RPC_URL}
+      - SEPOLIA_RPC_URL=${SEPOLIA_RPC_URL:-https://TODO_SEPOLIA_RPC_URL}
+      # Indexer
+      - INDEXER_SYNC_INTERVAL_MS=${INDEXER_SYNC_INTERVAL_MS:-60000}
+      - INDEXER_MAX_SNAPSHOTS_PER_WALLET=${INDEXER_MAX_SNAPSHOTS_PER_WALLET:-100}
+    ports:
+      - "3000:3000"
+    command: ["npm", "run", "dev"]
+    working_dir: /app/apps/api
+    volumes:
+      - ..:/app
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/web.Dockerfile
+    container_name: crosschain-web
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api:3000}
+      - WEB_PORT=${WEB_PORT:-3001}
+    ports:
+      - "3001:3001"
+    command: ["npm", "run", "dev"]
+    working_dir: /app/apps/web
+    depends_on:
+      - api
+    volumes:
+      - ..:/app
+
+
