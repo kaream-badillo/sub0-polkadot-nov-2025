@@ -1,29 +1,8 @@
 import Link from "next/link";
-import { useWalletStore } from "../store/useWalletStore";
-
-const MOCK_WALLETS = [
-  {
-    id: "eth-foundation",
-    label: "Ethereum Foundation",
-    chain: "Ethereum",
-    address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae",
-  },
-  {
-    id: "polygon-foundation",
-    label: "Polygon Foundation",
-    chain: "Polygon",
-    address: "0xD8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  },
-  {
-    id: "chainlink-grant",
-    label: "Chainlink Grant",
-    chain: "Ethereum",
-    address: "0x3f5CE5FBFe3E9af3971dD833D26BA9b5C936f0fE",
-  },
-];
+import { useWallets } from "../hooks/useWallets";
 
 export function WalletSidebar() {
-  const { selectedWalletId, selectWallet } = useWalletStore();
+  const { wallets, selectedWalletId, selectWallet, status } = useWallets();
 
   return (
     <aside className="flex h-screen w-80 flex-col border-r border-slate-800 bg-slate-950/80">
@@ -39,8 +18,18 @@ export function WalletSidebar() {
         <p className="px-2 text-xs font-medium uppercase tracking-wide text-slate-500">
           Watched wallets
         </p>
-        <nav className="mt-2 space-y-1">
-          {MOCK_WALLETS.map((wallet) => {
+        <div className="mt-2 space-y-2 px-2 text-xs text-slate-500">
+          {status === "loading" && (
+            <p className="animate-pulse">Loading wallets from API…</p>
+          )}
+          {status === "error" && (
+            <p className="text-amber-400">
+              Failed to load wallets. Check API and NEXT_PUBLIC_API_URL.
+            </p>
+          )}
+        </div>
+        <nav className="mt-1 space-y-1">
+          {wallets.map((wallet) => {
             const isActive = wallet.id === selectedWalletId;
             return (
               <button
@@ -55,7 +44,7 @@ export function WalletSidebar() {
               >
                 <span className="font-medium">{wallet.label}</span>
                 <span className="text-[11px] uppercase tracking-wide text-slate-500">
-                  {wallet.chain}
+                  {wallet.chainId}
                 </span>
               </button>
             );

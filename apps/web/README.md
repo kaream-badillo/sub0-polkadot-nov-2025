@@ -32,11 +32,29 @@ Por defecto, la app se sirve en `http://localhost:3000` (puedes cambiar el puert
 - **Estado global**: `store/useWalletStore.ts` (Zustand)
   - Maneja `selectedWalletId` y lista de wallets UI.
 
-### Integración futura con la API
+### Integración con la API
 
-- Consumir `GET /wallets` y `GET /wallets/:id/history` de `apps/api`.
-- Mapear la respuesta a `UiWallet` en el store de Zustand.
-- Mostrar gráficos e historial en el panel principal (Recharts u otra librería).
+- Hooks disponibles:
+  - `hooks/useWallets.ts`: llama a `GET /wallets?includeBalance=true` y sincroniza la lista de wallets y la selección actual con el store de Zustand.
+  - `hooks/useWalletHistory.ts`: llama a `GET /wallets/:id/history?limit=50` para construir el historial de snapshots de la wallet seleccionada.
+- El chart de historial usa **Recharts** y se renderiza en `app/main-panel.tsx`.
+
+### Configurar la API base URL
+
+- El frontend usa la variable `NEXT_PUBLIC_API_URL` para construir las URLs de la API.
+- Si no se define, por defecto usa `http://localhost:3000`.
+
+Ejemplo de `.env.local` en `apps/web`:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+En producción (por ejemplo en Fly.io) deberías apuntar a la URL pública del backend, por ejemplo:
+
+```bash
+NEXT_PUBLIC_API_URL=https://cross-chain-api.fly.dev
+```
 
 ### Despliegue (planificado)
 
