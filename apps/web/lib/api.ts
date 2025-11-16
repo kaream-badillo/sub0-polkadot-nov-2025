@@ -25,6 +25,17 @@ export type ApiWalletHistoryItem = {
   timestamp: number;
 };
 
+export type ApiAlertRule = {
+  id: string;
+  walletId: string;
+  type: "balance-drop" | "balance-increase" | "large-tx" | "custom";
+  direction: "above" | "below";
+  threshold: number;
+  windowMinutes: number;
+  enabled: boolean;
+  channel: "in-app" | "webhook" | "email";
+};
+
 export async function fetchWallets(): Promise<ApiWallet[]> {
   const res = await fetch(`${API_BASE_URL}/wallets?includeBalance=true`);
   if (!res.ok) {
@@ -47,6 +58,31 @@ export async function fetchWalletHistory(
   const json = await res.json();
   return json.data ?? [];
 }
+
+export async function createOrUpdateAlert(
+  alert: ApiAlertRule
+): Promise<ApiAlertRule> {
+  const res = await fetch(`${API_BASE_URL}/alerts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(alert),
+  });
+
+  if (!res.ok) {
+    const json = await res.json().catch(() => null);
+    const message =
+      json?.error ||
+      json?.message ||
+      `Failed to create alert (status ${res.status})`;
+    throw new Error(message);
+  }
+
+  const json = await res.json();
+  return json.data;
+}
+
 
 export type ApiWallet = {
   id: string;

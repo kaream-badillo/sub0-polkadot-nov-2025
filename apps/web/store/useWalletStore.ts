@@ -7,6 +7,7 @@ export type UiWallet = {
   label: string;
   address: string;
   chainId: ChainId;
+  tags?: string[];
 };
 
 type WalletState = {
@@ -14,6 +15,7 @@ type WalletState = {
   selectedWalletId: string | null;
   selectWallet: (id: string) => void;
   setWallets: (wallets: UiWallet[]) => void;
+  updateWalletTags: (id: string, tags: string[]) => void;
 };
 
 export const useWalletStore = create<WalletState>((set) => ({
@@ -21,6 +23,18 @@ export const useWalletStore = create<WalletState>((set) => ({
   selectedWalletId: null,
   selectWallet: (id) => set({ selectedWalletId: id }),
   setWallets: (wallets) => set({ wallets }),
+  updateWalletTags: (id, tags) =>
+    set((state) => ({
+      wallets: state.wallets.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              tags,
+            }
+          : w
+      ),
+    })),
 }));
+
 
 

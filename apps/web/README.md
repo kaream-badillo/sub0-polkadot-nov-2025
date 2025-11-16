@@ -21,16 +21,16 @@ npm start
 
 Por defecto, la app se sirve en `http://localhost:3000` (puedes cambiar el puerto con la variable de entorno `PORT` si lo necesitas para convivir con la API).
 
-### Layout actual (Fase 3.1)
+### Layout actual (Fase 3.1 / 3.3)
 
 - **Sidebar (wallets)**: componente `app/wallet-sidebar.tsx`
-  - Lista de wallets monitoreadas (mock por ahora) con selección básica.
-  - Preparado para conectarse a la API `/wallets` en fases posteriores.
+  - Consume `GET /wallets` para mostrar wallets registradas.
+  - Permite seleccionar la wallet activa.
 - **Panel principal**: componente `app/main-panel.tsx`
-  - Zona central para balances agregados, movimientos y alertas.
-  - Actualmente muestra placeholders explicando qué irá en cada bloque.
+  - Muestra balance más reciente y gráfico de historial (snapshots).
+  - Incluye formularios para **editar etiquetas** y **crear alertas**.
 - **Estado global**: `store/useWalletStore.ts` (Zustand)
-  - Maneja `selectedWalletId` y lista de wallets UI.
+  - Maneja `selectedWalletId`, lista de wallets UI y tags en memoria.
 
 ### Integración con la API
 
@@ -55,6 +55,19 @@ En producción (por ejemplo en Fly.io) deberías apuntar a la URL pública del b
 ```bash
 NEXT_PUBLIC_API_URL=https://cross-chain-api.fly.dev
 ```
+
+### Flujo de usuario (etiquetas y alertas)
+
+1. El usuario selecciona una wallet en el sidebar.
+2. En el panel **Tags & alerts**:
+   - Puede agregar o eliminar tags:
+     - Validación client-side (no vacío, longitud máxima, sin duplicados).
+     - Los tags se guardan solo en el estado del frontend (MVP, sin persistencia backend).
+   - Puede crear/actualizar una alerta:
+     - Define `Threshold (% change)`, `Window (minutes)`, `Direction` y `Channel`.
+     - El formulario hace `POST /alerts` (endpoint del backend).
+     - Si la operación es exitosa, se muestra un toast de éxito; si falla, un toast de error.
+3. Los toasts se gestionan vía `components/toast-provider.tsx` y se usan desde `app/main-panel.tsx`.
 
 ### Despliegue (planificado)
 

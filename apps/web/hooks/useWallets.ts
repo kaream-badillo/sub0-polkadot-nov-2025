@@ -26,6 +26,7 @@ export function useWallets() {
           label: string;
           address: string;
           chainId: "ethereum-mainnet" | "polygon-pos" | "unknown";
+          tags?: string[];
           latestSnapshot?: ApiWallet["latestSnapshot"];
         }>((w) => ({
           id: w.id,
@@ -35,6 +36,7 @@ export function useWallets() {
             w.chainId === "ethereum-mainnet" || w.chainId === "polygon-pos"
               ? (w.chainId as "ethereum-mainnet" | "polygon-pos")
               : "unknown",
+          tags: w.tags,
           latestSnapshot: w.latestSnapshot,
         }));
 
@@ -44,6 +46,7 @@ export function useWallets() {
             label: w.label,
             address: w.address,
             chainId: w.chainId,
+            tags: w.tags,
           }))
         );
 
@@ -68,6 +71,7 @@ export function useWallets() {
 
   return { wallets, status, error, selectedWalletId, selectWallet };
 }
+
 
 import { useEffect, useState } from "react";
 import type { ApiWallet, ApiWalletHistoryItem } from "../lib/api";
