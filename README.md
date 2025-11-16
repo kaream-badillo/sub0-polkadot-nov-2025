@@ -313,6 +313,17 @@ El roadmap detallado está en `docs/ROADMAP-PASOS.md`. Resumen:
 - **Fase 5** – Deploy, demo y documentación (este README, Docker Compose) ✅
 - **Fase 6** – Extras (ENS, oráculos, ZK, etc.) ⏳
 
+### 7.1. Extensiones futuras con Hyperbridge (ideas para jurado)
+
+- **Watched wallets → Governance / votos cross-chain (via Hyperbridge SDK)**  
+  - Extender la sección de wallets vigiladas para:
+    - Mostrar **historial de votos on-chain** asociados a una treasury (p.ej. referendums, governance tracks) leyendo storage de chains Polkadot-SDK.
+    - Resolver y agrupar **propuestas on-chain** en las que una wallet ha participado (sí/no/abstención) como “timeline de gobernanza”.
+  - Implementable con `@hyperbridge/sdk` usando:
+    - `SubstrateChain` + `queryStateProof` para extraer eventos de gobernanza relacionados a la dirección.
+    - `IndexerClient` para seguir el estado de mensajes/referendos entre chains.
+  - Estado: **diseño en proceso** (pensado como Fase 6.x, demostrando cómo Hyperbridge habilita vistas de gobernanza multichain encima del MVP actual).
+
 ---
 
 ## 8. Documentación adicional
