@@ -1,0 +1,23 @@
+{
+  "name": "sub0-2025",
+  "version": "1.0.0",
+  "description": "> **Aplicación Web3 para monitorear wallets públicas importantes (DAOs, tesorerías, protocolos) a través de múltiples blockchains en un solo panel.**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaream-badillo/sub0-polkadot-nov-2025.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaream-badillo/sub0-polkadot-nov-2025/issues"
+  },
+  "homepage": "https://github.com/kaream-badillo/sub0-polkadot-nov-2025#readme"
+}

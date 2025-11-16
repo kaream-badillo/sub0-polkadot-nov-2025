@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@repo/config": ["../../packages/config/src"],
-      "@repo/indexer": ["../indexer/src"]
+      "@repo/indexer": ["../indexer/src"],
+      "@repo/adapters": ["../../packages/adapters/src"]
     }
   },
   "include": ["src/**/*"],
