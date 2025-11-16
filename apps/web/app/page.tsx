@@ -1,4 +1,4 @@
-\"use client\";
+"use client";
 
 import { WalletSidebar } from "./wallet-sidebar";
 import { MainPanel } from "./main-panel";

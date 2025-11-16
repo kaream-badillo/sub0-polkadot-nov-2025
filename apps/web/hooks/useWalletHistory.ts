@@ -25,7 +25,7 @@ export function useWalletHistory() {
       try {
         setStatus("loading");
         setError(null);
-        const data = await fetchWalletHistory(selectedWalletId, 50);
+        const data = await fetchWalletHistory(selectedWalletId!, 50);
         if (cancelled) return;
 
         // Ordena por timestamp ascendente para el chart

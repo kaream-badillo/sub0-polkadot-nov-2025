@@ -7,11 +7,23 @@ import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import type { WalletIndexerService, IndexerServiceConfig } from '@repo/indexer';
 import { alertRules } from '@repo/config';
 import type { AlertRule } from '@repo/config';
+import { z } from 'zod';
 
 interface AlertPluginOptions extends FastifyPluginOptions {
   indexerService: WalletIndexerService;
   indexerConfig: IndexerServiceConfig;
 }
+
+const alertSchema = z.object({
+  id: z.string().min(1),
+  walletId: z.string().min(1),
+  type: z.enum(['balance-drop', 'balance-increase', 'large-tx', 'custom']),
+  direction: z.enum(['above', 'below']),
+  threshold: z.number().positive(),
+  windowMinutes: z.number().int().min(1).default(10),
+  enabled: z.boolean(),
+  channel: z.enum(['in-app', 'webhook', 'email'])
+});
 
 // In-memory storage for alert rules (TODO: replace with persistent storage)
 let alertRulesStorage: AlertRule[] = [...alertRules];
@@ -188,24 +200,19 @@ export async function alertRoutes(
     },
     async (request, reply) => {
       try {
-        const alert = request.body;
-
-        // Basic validation
-        if (
-          !alert.id ||
-          !alert.walletId ||
-          !alert.type ||
-          !alert.threshold ||
-          alert.enabled === undefined
-        ) {
+        const parseResult = alertSchema.safeParse(request.body);
+        if (!parseResult.success) {
           reply.code(400);
           return {
             success: false,
-            error: 'Missing required fields: id, walletId, type, threshold, enabled'
+            error: 'Invalid alert payload',
+            details: parseResult.error.issues
           };
         }
 
-        // Check if wallet exists
+        const alert = parseResult.data;
+
+        // Check if wallet exists (only accept alerts for valid wallets)
         const wallets = await indexerService.getAllWallets();
         const walletExists = wallets.some((w) => w.id === alert.walletId);
         if (!walletExists) {
@@ -227,8 +234,6 @@ export async function alertRoutes(
         }
 
         // Update indexer configuration with new alert rules
-        // Note: This requires recreating the indexer service with updated config
-        // In a real implementation, this would be handled by a service manager
         indexerConfig.alertRules = alertRulesStorage;
 
         fastify.log.info(`Alert rule ${alert.id} ${existingIndex >= 0 ? 'updated' : 'created'}`);

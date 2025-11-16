@@ -7,6 +7,8 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import rateLimit from '@fastify/rate-limit';
+import client from 'prom-client';
 import { createIndexerService, type IndexerServiceConfig } from '@repo/indexer';
 import { createBalanceProvider } from '@repo/adapters';
 import { chainProfiles, alertRules, walletTargets } from '@repo/config';
@@ -15,14 +17,25 @@ import { chainRoutes } from './routes/chains';
 import { alertRoutes } from './routes/alerts';
 
 const fastify = Fastify({
+  // Fastify uses pino under the hood for structured logs.
   logger: {
     level: process.env.LOG_LEVEL || 'info'
   }
 });
 
+// Prometheus metrics registry for the API + in-process indexer.
+const register = new client.Registry();
+client.collectDefaultMetrics({ register });
+
 // Register CORS
 fastify.register(cors, {
   origin: true // Allow all origins in development
+});
+
+// Rate limiting per IP (simple global policy, override with env if needed)
+fastify.register(rateLimit, {
+  max: Number(process.env.API_RATE_LIMIT_PER_MINUTE) || 60,
+  timeWindow: '1 minute'
 });
 
 // Register Swagger/OpenAPI
@@ -104,6 +117,14 @@ fastify.get('/health', async (request, reply) => {
     timestamp: Date.now(),
     version: '0.1.0'
   };
+});
+
+// Prometheus metrics endpoint (to be scraped by Prometheus).
+fastify.get('/metrics', async (request, reply) => {
+  const metrics = await register.metrics();
+  reply
+    .header('Content-Type', register.contentType)
+    .send(metrics);
 });
 
 // Start server

@@ -13,6 +13,8 @@ API Gateway REST para el Cross-Chain Treasury Monitor. Expone endpoints para ges
 - ✅ Testing básico con Vitest
 - ✅ CORS habilitado para desarrollo
 - ✅ Health check endpoint
+ - ✅ Rate limiting global por IP (configurable vía `API_RATE_LIMIT_PER_MINUTE`)
+ - ✅ Validación de payloads de wallets y alertas con Zod
 
 ## Instalación
 
@@ -356,6 +358,33 @@ Ver `env.example` en la raíz del proyecto. Variables relevantes:
 
 - `API_PORT` - Puerto del servidor (default: 3000)
 - `LOG_LEVEL` - Nivel de logging (default: info)
+- `API_RATE_LIMIT_PER_MINUTE` - Límite de requests por IP y minuto (default: 60)
+
+## Checklist de Seguridad (MVP)
+
+- **Entrada y validación**
+  - [x] Validar payload de **wallets** con Zod (`id`, `address`, `chainId`, `importance`, `tags`).
+  - [x] Validar payload de **alerts** con Zod (`threshold` positivo, `windowMinutes` >= 1, enums seguros).
+  - [x] Aceptar alertas solo para **wallets existentes** en el indexer.
+  - [ ] Añadir validaciones específicas por tipo de address (Substrate, Lisk, etc.) cuando se soporten más formatos.
+
+- **Rate limiting y abuso**
+  - [x] Rate limit global por IP con `@fastify/rate-limit`, usando `API_RATE_LIMIT_PER_MINUTE`.
+  - [ ] Configurar límites más estrictos en entornos públicos (por ejemplo, 30 rpm o menos).
+
+- **Logs y observabilidad**
+  - [x] Logs estructurados vía Fastify/Pino (`LOG_LEVEL`).
+  - [x] Endpoint `/metrics` con `prom-client` para Prometheus (proceso API + indexer).
+  - [ ] Conectar logs a un backend (Loki/Elastic) en despliegues gestionados.
+
+- **Autenticación y permisos (futuro)**
+  - [ ] Proteger endpoints de escritura (`POST /wallets`, `POST /alerts`, `DELETE`) con API key o JWT.
+  - [ ] Limitar quién puede registrar wallets de alto impacto (`core-treasury`).
+
+- **Infra y despliegue**
+  - [ ] Usar HTTPS en producción (TLS termination en reverse proxy o gateway).
+  - [ ] Revisar `CORS` para no abrir a `origin: true` en producción.
+  - [ ] Revisar variables sensibles (RPC URLs, keys) solo en el entorno necesario.
 
 ## Estructura del Proyecto
 

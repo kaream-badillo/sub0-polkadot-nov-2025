@@ -1,3 +1,5 @@
+"use client";
+
 import { FormEvent, useMemo, useState } from "react";
 import { useWallets } from "../hooks/useWallets";
 import { useWalletHistory } from "../hooks/useWalletHistory";

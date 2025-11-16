@@ -6,6 +6,7 @@
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import type { WalletIndexerService } from '@repo/indexer';
 import type { WalletTarget } from '@repo/config';
+import { z } from 'zod';
 
 interface WalletPluginOptions extends FastifyPluginOptions {
   indexerService: WalletIndexerService;
@@ -20,6 +21,18 @@ interface WalletWithBalance extends WalletTarget {
   };
   totalBalance?: string; // Aggregated balance if multiple chains
 }
+
+const walletSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1).max(128).optional(),
+  address: z
+    .string()
+    .min(1)
+    .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid EVM address format'),
+  chainId: z.string().min(1),
+  tags: z.array(z.string().min(1).max(32)).optional(),
+  importance: z.enum(['core-treasury', 'ops', 'watchlist']).optional()
+});
 
 export async function walletRoutes(
   fastify: FastifyInstance,
@@ -327,16 +340,17 @@ export async function walletRoutes(
     },
     async (request, reply) => {
       try {
-        const wallet = request.body;
-
-        // Basic validation
-        if (!wallet.id || !wallet.address || !wallet.chainId) {
+        const parseResult = walletSchema.safeParse(request.body);
+        if (!parseResult.success) {
           reply.code(400);
           return {
             success: false,
-            error: 'Missing required fields: id, address, chainId'
+            error: 'Invalid wallet payload',
+            details: parseResult.error.issues
           };
         }
+
+        const wallet = parseResult.data;
 
         await indexerService.registerWallet(wallet);
 
